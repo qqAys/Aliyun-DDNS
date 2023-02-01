@@ -39,7 +39,7 @@ alibabacloud_alidns20150109==3.0.1, requests~=2.28.2, jsonpath~=0.82, ntplib~=0.
 
 ## 效果
 
-![DDNS.log](https://i.328888.xyz/2023/02/01/8LNyv.png)
+![DDNS.log](https://cdn.qqays.xyz/uploads/2023/02/01/8LNyv.png)
 
 ## 相关链接
 
