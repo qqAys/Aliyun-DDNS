@@ -34,7 +34,7 @@ alibabacloud_alidns20150109==3.0.1, requests~=2.28.2, jsonpath~=0.82, ntplib~=0.
 
 2. 使用`crontab -e`添加定时执行并追加输出结果至文件。
 ```
-*/5 * * * * python3 /root/Alidns/main.py >> /root/DDNS.log
+*/5 * * * * python3 /root/Aliyun-DDNS-main/main.py >> /root/Aliyun-DDNS-main/DDNS.log
 ```
 
 ## 效果
