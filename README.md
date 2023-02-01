@@ -10,20 +10,20 @@
 
 ## 脚本原理
 
-**查询DNS记录值**：AccessKey ID与AccessKey Secret创建连接请求 -> 使用主机记录查询RecordId -> 使用RecordId查询记录值
+查询DNS记录值：AccessKey ID与AccessKey Secret创建连接请求 -> 使用主机记录查询RecordId -> 使用RecordId查询记录值
 
-**查询公网IP**：使用[checkip.amazonaws.com](http://checkip.amazonaws.com)查询公网IP值
+查询公网IP：使用[checkip.amazonaws.com](http://checkip.amazonaws.com)查询公网IP值
 
 ## 使用说明
 
-部署前请修改`main.py`中5处值：
+部署前请修改`main.py`中5处常量：
 
 ```
-access_key_id='AccessKey ID',         # 填入你阿里云的AccessKey ID
-access_key_secret='AccessKey Secret'  # 填入你阿里云的AccessKey Secret
-rr='dns',                             # 要更改的主机记录
+access_key_id='AccessKey ID',         # 阿里云AccessKey ID
+access_key_secret='AccessKey Secret'  # 阿里云AccessKey Secret
+rr='dns',                             # 需要更改的主机记录
 domain_name='qqays.xyz',              # 你的域名
-rrkey_word='dns'                      # 要更改的主机记录
+rrkey_word='dns'                      # 需要更改的主机记录
 ```
 
 1. 使用`pip3 install`安装如下软件包。
