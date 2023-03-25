@@ -14,6 +14,9 @@
 
 import datetime
 import json
+import smtplib
+from email.header import Header
+from email.mime.text import MIMEText
 
 import ntplib
 import requests
@@ -67,8 +70,19 @@ class DDNS:
     @staticmethod
     def get_ntp_time():
         ntp_client = ntplib.NTPClient()
-        response = ntp_client.request('cn.ntp.org.cn')
+        response = ntp_client.request('ntp.ntsc.ac.cn')
         return datetime.datetime.fromtimestamp(response.tx_time)
+
+    @staticmethod
+    def send_mail(header, msg):
+        smtp = smtplib.SMTP_SSL('smtp.exmail.qq.com', 465)
+        smtp.login('mail_address', 'passwd')
+        message = MIMEText(msg, 'plain', 'utf-8')
+        message['From'] = Header('sender', 'utf-8')
+        message['To'] = Header('send_to', 'utf-8')
+        message['Subject'] = Header(header, 'utf-8')
+        smtp.sendmail('sender', 'send_to', message.as_string())
+        smtp.quit()
 
 
 if __name__ == '__main__':
@@ -81,6 +95,9 @@ if __name__ == '__main__':
         try:
             DDNS.update(record_id, pub_ip)
             new_record = DDNS.describe()[0]
-            print(f'{date_time}  Success: DNS record {old_record} --> {new_record}')
+            DDNS.send_mail('DNS Changed',
+                           f'Hi \n\n  域名 yun.qqays.xyz 于 {date_time}\n  从 {old_record} 变更为 {new_record}\n\n以上')
+            print(f'{date_time}  Success: DomainRecord {old_record} --> {new_record}')
         except Exception as update_error:
+            DDNS.send_mail('DNS Change Failed', f'Hi \n\n  域名 yun.qqays.xyz 于 {date_time}\n  {update_error}\n\n以上')
             print(f'{date_time}  {update_error}')

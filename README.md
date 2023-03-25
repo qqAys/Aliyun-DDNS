@@ -6,7 +6,7 @@
 
 这是一个由Python编写的阿里云DDNS脚本，可以自动查询执行脚本机器的当前公网IP并与域名中某个A类主机记录比对。
 
-如执行脚本机器当前公网IP与主机记录值有差异就会进行值更新，并使用`print()`函数进行打印，如值相同则不打印。
+如执行脚本机器当前公网IP与主机记录值有差异就会进行值更新，并发送通知邮件。
 
 ## 脚本原理
 
@@ -14,27 +14,19 @@
 
 查询公网IP：使用[checkip.amazonaws.com](http://checkip.amazonaws.com)查询公网IP值
 
-## 使用说明
 
-部署前请修改`main.py`中5处常量：
-
-```
-access_key_id='AccessKey ID',         # 阿里云AccessKey ID
-access_key_secret='AccessKey Secret'  # 阿里云AccessKey Secret
-rr='dns',                             # 需要更改的主机记录
-domain_name='qqays.xyz',              # 你的域名
-rrkey_word='dns'                      # 需要更改的主机记录
-```
-
-1. 使用`pip3 install`安装如下软件包。
+1. 安装Python要求。
 
 ```
-alibabacloud_alidns20150109==3.0.1, requests~=2.28.2, jsonpath~=0.82, ntplib~=0.4.0
+pip3 install -r requirements.txt
 ```
 
-2. 使用`crontab -e`添加定时执行并追加输出结果至文件。
+2. 修改配置。
+
+3. 使用`crontab -e`添加定时执行。
+
 ```
-*/5 * * * * python3 /root/Aliyun-DDNS-main/main.py >> /root/Aliyun-DDNS-main/DDNS.log
+*/5 * * * * python3 /root/Alidns/main.py >> /root/DDNS.log
 ```
 
 ## 效果
