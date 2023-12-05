@@ -1,0 +1,30 @@
+[service]
+# 检测公网IP地址的链接, 以下只能唯一值, 亚马逊速度稍慢
+# pub_ip_url=http://checkip.amazonaws.com
+pub_ip_url=http://qqays.xyz:8443
+
+[account]
+# 阿里云云解析服务区域列表, 参考 https://api.aliyun.com/product/Alidns
+end_point=YourAliyunEndPoint
+# 阿里云申请的AccessKey信息
+access_key_id=YourAliyunAccessKeyId
+access_key_secret=YourAliyunAccessKeySecret
+
+[domain]
+# 域名
+domain_name=qqays.xyz
+# 主机记录
+rr_key_word=yun
+# 记录类型
+type_key_word=A
+
+[mail]
+# SMTP配置
+smtp_host=smtp.gmail.com
+smtp_port=465
+smtp_ssl=True
+sender=ReadableName
+user=sender@example.com
+passwd=YourPassword
+# 要发送的邮件收件人, 以英文逗号间隔, 无需空格
+send_to=user@icloud.com,user@gmail.com
