@@ -50,8 +50,9 @@ def get_timestamp():
 
 
 class AliDDNS:
+    work_dir = os.path.dirname(__file__)
     ini_config = configparser.ConfigParser()  # 实例化ConfigParser
-    record_file = './aliyun_domain_record.ini'  # 解析记录配置
+    record_file = os.path.join(work_dir, 'aliyun_domain_record.ini')  # 解析记录配置
 
     def __init__(self):
         """
@@ -59,7 +60,7 @@ class AliDDNS:
         """
         self.args = sys.argv
         if len(self.args) <= 1:
-            self.config_file = './config.ini'
+            self.config_file = os.path.join(self.work_dir, 'config.ini')
         else:
             self.config_file = self.args[1]
         if not os.path.exists(self.config_file):
