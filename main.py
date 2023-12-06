@@ -105,12 +105,13 @@ class AliDDNS:
         """
         if not os.path.exists(self.record_file):
             print('{} [INFO] 获取不到配置文件: {}'.format(get_readable_time(), self.record_file))
-            with open('{}'.format(self.record_file), 'w') as record_file:
+            current_record = self._describe_record()
+            with open(self.record_file, 'w') as record_file:
                 record_file.write(
                     '[domain_record]\nid={}\nvalue={}\ntime={}'
                     .format(
-                        self.describe_record()['record_id'],
-                        self.describe_record()['record_value'],
+                        current_record['record_id'],
+                        current_record['record_value'],
                         get_timestamp()
                     )
                 )
@@ -122,12 +123,13 @@ class AliDDNS:
             return {'record_id': record_id, 'record_value': record_value, 'write_time': write_time}
         except configparser.NoSectionError as NoSectionError:
             print('{} [INFO] 获取不到配置节: {}'.format(get_readable_time(), NoSectionError))
-            with open('{}'.format(self.record_file), 'w') as record_file:
+            current_record = self._describe_record()
+            with open(self.record_file, 'w') as record_file:
                 record_file.write(
                     '[domain_record]\nid={}\nvalue={}\ntime={}'
                     .format(
-                        self.describe_record()['record_id'],
-                        self.describe_record()['record_value'],
+                        current_record['record_id'],
+                        current_record['record_value'],
                         get_timestamp()
                     )
                 )
@@ -175,7 +177,7 @@ class AliDDNS:
         )
         return Alidns20150109Client(config)
 
-    def describe_record(self):
+    def _describe_record(self):
         """
         查询解析记录
         :return: dict & bool(false)
@@ -190,24 +192,21 @@ class AliDDNS:
             resp = client.describe_domain_records_with_options(describe_domain_records_request, runtime)
         except Exception as DescribeError:
             print('{} [ERROR] 查询域名主机记录失败: {}'.format(get_readable_time(), DescribeError))
-            self.send_mail(
-                self.send_list,
-                '[{}][FAIL]DescribeDomainRecord'.format(self.domain_name),
-                '域名 {} 主机记录 {} 的值于 {} 查询失败, 原因:\n\n{}'
-                .format(
-                    self.domain_name,
-                    self.rr_key_word,
-                    get_readable_time(),
-                    DescribeError
-                )
-            )
+            self._send_mail(self.send_list, '[{}][FAIL]DescribeDomainRecord'.format(self.domain_name),
+                            '域名 {} 主机记录 {} 的值于 {} 查询失败, 原因:\n\n{}'
+                            .format(
+                                self.domain_name,
+                                self.rr_key_word,
+                                get_readable_time(),
+                                DescribeError
+                            ))
             return False
         request = json.loads(UtilClient.to_jsonstring(resp))
         record_value = jsonpath(request, '$...Value')[0]
         record_id = jsonpath(request, '$...RecordId')[0]
         return {'record_id': record_id, 'record_value': record_value}
 
-    def update_record(self, record_id: str, record_value: str):
+    def _update_record(self, record_id: str, record_value: str):
         """
         更新解析记录
         :param record_id: 记录ID
@@ -224,34 +223,28 @@ class AliDDNS:
         runtime = util_models.RuntimeOptions()
         try:
             client.update_domain_record_with_options(update_domain_record_request, runtime)
-            self.send_mail(
-                self.send_list,
-                '[{}][PASS]UpdateDomainRecord'.format(self.domain_name),
-                '域名 {} 主机记录 {} 的值于 {} 变更成功, 新的值为 {}'
-                .format(
-                    self.domain_name,
-                    self.rr_key_word,
-                    get_readable_time(),
-                    record_value
-                )
-            )
+            self._send_mail(self.send_list, '[{}][PASS]UpdateDomainRecord'.format(self.domain_name),
+                            '域名 {} 主机记录 {} 的值于 {} 变更成功, 新的值为 {}'
+                            .format(
+                                self.domain_name,
+                                self.rr_key_word,
+                                get_readable_time(),
+                                record_value
+                            ))
             return True
         except Exception as UpdateError:
             print('{} [ERROR] 更新域名主机记录失败: {}'.format(get_readable_time(), UpdateError))
-            self.send_mail(
-                self.send_list,
-                '[{}][FAIL]UpdateDomainRecord'.format(self.domain_name),
-                '域名 {} 主机记录 {} 的值于 {} 变更失败, 原因:\n\n{}'
-                .format(
-                    self.domain_name,
-                    self.rr_key_word,
-                    get_readable_time(),
-                    UpdateError
-                )
-            )
+            self._send_mail(self.send_list, '[{}][FAIL]UpdateDomainRecord'.format(self.domain_name),
+                            '域名 {} 主机记录 {} 的值于 {} 变更失败, 原因:\n\n{}'
+                            .format(
+                                self.domain_name,
+                                self.rr_key_word,
+                                get_readable_time(),
+                                UpdateError
+                            ))
             return False
 
-    def send_mail(self, to_addrs: list, header: str, msg: str):
+    def _send_mail(self, to_addrs: list, header: str, msg: str):
         """
         发送邮件
         :param to_addrs: list(mail_list)
@@ -282,7 +275,7 @@ class AliDDNS:
         current_config = self._read_record_config()
         current_ip = self._get_pubic_ipaddr()
         if current_ip != current_config['record_value']:
-            update_result = self.update_record(current_config['record_id'], current_ip)
+            update_result = self._update_record(current_config['record_id'], current_ip)
             self._update_record_config(current_config['record_id'], current_ip)
             if update_result:
                 current_config = self._read_record_config()
