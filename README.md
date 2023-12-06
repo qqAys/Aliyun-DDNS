@@ -39,11 +39,13 @@ mv config.ini.example config.ini
 
 ```shell
 */5 * * * * python3 /root/Aliyun-DDNS/main.py >> /root/Aliyun-DDNS/DDNS.log
+# 或者指定配置文件路径参数
+*/5 * * * * python3 /root/Aliyun-DDNS/main.py /opt/config.ini >> /root/Aliyun-DDNS/DDNS.log
 ```
 
 ## 效果
 
-![DDNS.log](https://cdn.qqays.xyz/uploads/2023/02/01/8LNyv.png)
+![DDNS.log](https://cdn.qqays.xyz/uploads/2023/12/06/Snipaste_2023-12-06_09-49-35.png)
 
 ## 相关链接
 
