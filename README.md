@@ -12,7 +12,7 @@
 
 查询DNS记录值：AccessKey ID与AccessKey Secret创建连接请求 -> 使用主机记录查询RecordId -> 使用RecordId查询记录值
 
-查询公网IP：使用[checkip.amazonaws.com](http://checkip.amazonaws.com)查询公网IP值(速度较慢)，可使用[qqays.xyz:8443](http://qqays.xyz:8443)进行公网IP值的查询。
+查询公网IP：使用[checkip.amazonaws.com](http://checkip.amazonaws.com)查询公网IP值(速度较慢)，可使用[service.qqays.xyz/my-ip](http://service.qqays.xyz/my-ip)进行公网IP值的查询。
 
 ## 使用
 
