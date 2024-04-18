@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-#  Copyright (c) 2021 - 2023 qqAys.
+#  Copyright (c) 2021 - 2024 qqAys.
 
-# @Time          : 2023/01/14 10:26
+# @Time          : 2024/04/18 09:05
 # @Author        : Jinx
 # @Email-Private : me@qqays.xyz
 # @Github        : https://github.com/qqAys
@@ -33,7 +33,7 @@ def get_readable_time():
     :return: eg. 2023-12-05 14:18:06
     """
     timestamp = int(time.time())
-    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(timestamp))
+    return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(timestamp))
 
 
 def get_timestamp():
@@ -47,7 +47,7 @@ def get_timestamp():
 class AliDDNS:
     work_dir = os.path.dirname(__file__)
     ini_config = configparser.ConfigParser()  # 实例化ConfigParser
-    record_file = os.path.join(work_dir, 'aliyun_domain_record.ini')  # 解析记录配置
+    record_file = os.path.join(work_dir, "aliyun_domain_record.ini")  # 解析记录配置
 
     def __init__(self):
         """
@@ -55,46 +55,68 @@ class AliDDNS:
         """
         self.args = sys.argv
         if len(self.args) <= 1:
-            self.config_file = os.path.join(self.work_dir, 'config.ini')
+            self.config_file = os.path.join(self.work_dir, "config.ini")
         else:
             self.config_file = self.args[1]
         if not os.path.exists(self.config_file):
-            print('{} [ERROR] 获取不到配置文件: {}'.format(get_readable_time(), self.config_file))
+            print(
+                "{} [ERROR] 获取不到配置文件: {}".format(
+                    get_readable_time(), self.config_file
+                )
+            )
             sys.exit()
 
         self.ini_config.read(self.config_file)
-        self.pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        self.pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         try:
-            self.pub_ip_url = self.ini_config.get('service', 'pub_ip_url')
-            self.end_point = self.ini_config.get('account', 'end_point')
-            self.access_key_id = self.ini_config.get('account', 'access_key_id')
-            self.access_key_secret = self.ini_config.get('account', 'access_key_secret')
-            self.domain_name = self.ini_config.get('domain', 'domain_name')
-            self.rr_key_word = self.ini_config.get('domain', 'rr_key_word')
-            self.type_key_word = self.ini_config.get('domain', 'type_key_word')
-            self.smtp_host = self.ini_config.get('mail', 'smtp_host')
-            self.smtp_port = int(self.ini_config.get('mail', 'smtp_port'))
-            self.smtp_ssl = self.ini_config.get('mail', 'smtp_ssl')
-            self.mail_sender = self.ini_config.get('mail', 'sender')
-            self.mail_user = self.ini_config.get('mail', 'user')
-            self.mail_passwd = self.ini_config.get('mail', 'passwd')
-            self._pre_match_mail = self.ini_config.get('mail', 'send_to').split(',')
+            self.pub_ip_url = self.ini_config.get("service", "pub_ip_url")
+            self.end_point = self.ini_config.get("account", "end_point")
+            self.access_key_id = self.ini_config.get("account", "access_key_id")
+            self.access_key_secret = self.ini_config.get("account", "access_key_secret")
+            self.domain_name = self.ini_config.get("domain", "domain_name")
+            self.rr_key_word = self.ini_config.get("domain", "rr_key_word")
+            self.type_key_word = self.ini_config.get("domain", "type_key_word")
+            self.smtp_host = self.ini_config.get("mail", "smtp_host")
+            self.smtp_port = int(self.ini_config.get("mail", "smtp_port"))
+            self.smtp_ssl = self.ini_config.get("mail", "smtp_ssl")
+            self.mail_sender = self.ini_config.get("mail", "sender")
+            self.mail_user = self.ini_config.get("mail", "user")
+            self.mail_passwd = self.ini_config.get("mail", "passwd")
+            self._pre_match_mail = self.ini_config.get("mail", "send_to").split(",")
         except configparser.NoOptionError as NoOptionError:
-            print('{} [ERROR] 获取不到配置项: {}'.format(get_readable_time(), NoOptionError))
+            print(
+                "{} [ERROR] 获取不到配置项: {}".format(
+                    get_readable_time(), NoOptionError
+                )
+            )
             sys.exit()
         except configparser.NoSectionError as NoSectionError:
-            print('{} [ERROR] 获取不到配置节: {}'.format(get_readable_time(), NoSectionError))
+            print(
+                "{} [ERROR] 获取不到配置节: {}".format(
+                    get_readable_time(), NoSectionError
+                )
+            )
             sys.exit()
         except Exception as GetConfigError:
-            print('{} [ERROR] 错误的配置项: {}'.format(get_readable_time(), GetConfigError))
+            print(
+                "{} [ERROR] 错误的配置项: {}".format(
+                    get_readable_time(), GetConfigError
+                )
+            )
             sys.exit()
         self.send_list = []
         if not re.match(self.pattern, self.mail_user):
-            print('{} [ERROR] 错误的邮箱地址: {}'.format(get_readable_time(), self.mail_user))
+            print(
+                "{} [ERROR] 错误的邮箱地址: {}".format(
+                    get_readable_time(), self.mail_user
+                )
+            )
             sys.exit()
         for mail in self._pre_match_mail:
             if not re.match(self.pattern, mail):
-                print('{} [WARNING] 错误的邮箱地址: {}'.format(get_readable_time(), mail))
+                print(
+                    "{} [WARNING] 错误的邮箱地址: {}".format(get_readable_time(), mail)
+                )
             else:
                 self.send_list.append(mail)
 
@@ -104,40 +126,54 @@ class AliDDNS:
         :return: dict
         """
         if not os.path.exists(self.record_file):
-            print('{} [INFO] 获取不到配置文件: {}'.format(get_readable_time(), self.record_file))
+            print(
+                "{} [INFO] 获取不到配置文件: {}".format(
+                    get_readable_time(), self.record_file
+                )
+            )
             current_record = self._describe_record()
-            with open(self.record_file, 'w') as record_file:
+            with open(self.record_file, "w") as record_file:
                 record_file.write(
-                    '[domain_record]\nid={}\nvalue={}\ntime={}'
-                    .format(
-                        current_record['record_id'],
-                        current_record['record_value'],
-                        get_timestamp()
+                    "[domain_record]\nid={}\nvalue={}\ntime={}".format(
+                        current_record["record_id"],
+                        current_record["record_value"],
+                        get_timestamp(),
                     )
                 )
         try:
             self.ini_config.read(self.record_file)
-            record_id = self.ini_config.get('domain_record', 'id')
-            record_value = self.ini_config.get('domain_record', 'value')
-            write_time = self.ini_config.get('domain_record', 'time')
-            return {'record_id': record_id, 'record_value': record_value, 'write_time': write_time}
+            record_id = self.ini_config.get("domain_record", "id")
+            record_value = self.ini_config.get("domain_record", "value")
+            write_time = self.ini_config.get("domain_record", "time")
+            return {
+                "record_id": record_id,
+                "record_value": record_value,
+                "write_time": write_time,
+            }
         except configparser.NoSectionError as NoSectionError:
-            print('{} [INFO] 获取不到配置节: {}'.format(get_readable_time(), NoSectionError))
+            print(
+                "{} [INFO] 获取不到配置节: {}".format(
+                    get_readable_time(), NoSectionError
+                )
+            )
             current_record = self._describe_record()
-            with open(self.record_file, 'w') as record_file:
+            with open(self.record_file, "w") as record_file:
                 record_file.write(
-                    '[domain_record]\nid={}\nvalue={}\ntime={}'
-                    .format(
-                        current_record['record_id'],
-                        current_record['record_value'],
-                        get_timestamp()
+                    "[domain_record]\nid={}\nvalue={}\ntime={}".format(
+                        current_record["record_id"],
+                        current_record["record_value"],
+                        get_timestamp(),
                     )
                 )
             self.ini_config.read(self.record_file)
-            record_id = self.ini_config.get('domain_record', 'id')
-            record_value = self.ini_config.get('domain_record', 'value')
-            write_time = self.ini_config.get('domain_record', 'time')
-            return {'record_id': record_id, 'record_value': record_value, 'write_time': write_time}
+            record_id = self.ini_config.get("domain_record", "id")
+            record_value = self.ini_config.get("domain_record", "value")
+            write_time = self.ini_config.get("domain_record", "time")
+            return {
+                "record_id": record_id,
+                "record_value": record_value,
+                "write_time": write_time,
+            }
 
     def _update_record_config(self, record_id: str, record_value: str):
         """
@@ -146,11 +182,11 @@ class AliDDNS:
         :param record_value: 记录值
         """
         update_config = configparser.ConfigParser()
-        with open(self.record_file, 'w') as configfile:
-            update_config['domain_record'] = {}
-            update_config['domain_record']['id'] = record_id
-            update_config['domain_record']['value'] = record_value
-            update_config['domain_record']['time'] = str(get_timestamp())
+        with open(self.record_file, "w") as configfile:
+            update_config["domain_record"] = {}
+            update_config["domain_record"]["id"] = record_id
+            update_config["domain_record"]["value"] = record_value
+            update_config["domain_record"]["time"] = str(get_timestamp())
             update_config.write(configfile)
 
     def _get_pubic_ipaddr(self):
@@ -161,7 +197,11 @@ class AliDDNS:
         try:
             ip = requests.get(self.pub_ip_url).text.strip()
         except Exception as GetPubicIpERROR:
-            print('{} [ERROR] 获取公网IP失败: {}'.format(get_readable_time(), GetPubicIpERROR))
+            print(
+                "{} [ERROR] 获取公网IP失败: {}".format(
+                    get_readable_time(), GetPubicIpERROR
+                )
+            )
             sys.exit()
         return ip
 
@@ -173,7 +213,7 @@ class AliDDNS:
         config = open_api_models.Config(
             access_key_id=self.access_key_id,
             access_key_secret=self.access_key_secret,
-            endpoint=self.end_point
+            endpoint=self.end_point,
         )
         return Alidns20150109Client(config)
 
@@ -183,28 +223,37 @@ class AliDDNS:
         :return: dict & bool(false)
         """
         client = self._create_client()
-        describe_domain_records_request = alidns_20150109_models.DescribeDomainRecordsRequest(
-            domain_name=self.domain_name,
-            rrkey_word=self.rr_key_word
+        describe_domain_records_request = (
+            alidns_20150109_models.DescribeDomainRecordsRequest(
+                domain_name=self.domain_name, rrkey_word=self.rr_key_word
+            )
         )
         runtime = util_models.RuntimeOptions()
         try:
-            resp = client.describe_domain_records_with_options(describe_domain_records_request, runtime)
+            resp = client.describe_domain_records_with_options(
+                describe_domain_records_request, runtime
+            )
         except Exception as DescribeError:
-            print('{} [ERROR] 查询域名主机记录失败: {}'.format(get_readable_time(), DescribeError))
-            self._send_mail(self.send_list, '[{}][FAIL]DescribeDomainRecord'.format(self.domain_name),
-                            '域名 {} 主机记录 {} 的值于 {} 查询失败, 原因:\n\n{}'
-                            .format(
-                                self.domain_name,
-                                self.rr_key_word,
-                                get_readable_time(),
-                                DescribeError
-                            ))
+            print(
+                "{} [ERROR] 查询域名主机记录失败: {}".format(
+                    get_readable_time(), DescribeError
+                )
+            )
+            self._send_mail(
+                self.send_list,
+                "[{}][FAIL]DescribeDomainRecord".format(self.domain_name),
+                "域名 {} 主机记录 {} 的值于 {} 查询失败, 原因:\n\n{}".format(
+                    self.domain_name,
+                    self.rr_key_word,
+                    get_readable_time(),
+                    DescribeError,
+                ),
+            )
             return False
         request = json.loads(UtilClient.to_jsonstring(resp))
-        record_value = jsonpath(request, '$...Value')[0]
-        record_id = jsonpath(request, '$...RecordId')[0]
-        return {'record_id': record_id, 'record_value': record_value}
+        record_value = jsonpath(request, "$...Value")[0]
+        record_id = jsonpath(request, "$...RecordId")[0]
+        return {"record_id": record_id, "record_value": record_value}
 
     def _update_record(self, record_id: str, record_value: str):
         """
@@ -218,30 +267,37 @@ class AliDDNS:
             record_id=record_id,
             rr=self.rr_key_word,
             type=self.type_key_word,
-            value=record_value
+            value=record_value,
         )
         runtime = util_models.RuntimeOptions()
         try:
-            client.update_domain_record_with_options(update_domain_record_request, runtime)
-            self._send_mail(self.send_list, '[{}][PASS]UpdateDomainRecord'.format(self.domain_name),
-                            '域名 {} 主机记录 {} 的值于 {} 变更成功, 新的值为 {}'
-                            .format(
-                                self.domain_name,
-                                self.rr_key_word,
-                                get_readable_time(),
-                                record_value
-                            ))
+            client.update_domain_record_with_options(
+                update_domain_record_request, runtime
+            )
+            self._send_mail(
+                self.send_list,
+                "[{}][PASS]UpdateDomainRecord".format(self.domain_name),
+                "域名 {} 主机记录 {} 的值于 {} 变更成功, 新的值为 {}".format(
+                    self.domain_name,
+                    self.rr_key_word,
+                    get_readable_time(),
+                    record_value,
+                ),
+            )
             return True
         except Exception as UpdateError:
-            print('{} [ERROR] 更新域名主机记录失败: {}'.format(get_readable_time(), UpdateError))
-            self._send_mail(self.send_list, '[{}][FAIL]UpdateDomainRecord'.format(self.domain_name),
-                            '域名 {} 主机记录 {} 的值于 {} 变更失败, 原因:\n\n{}'
-                            .format(
-                                self.domain_name,
-                                self.rr_key_word,
-                                get_readable_time(),
-                                UpdateError
-                            ))
+            print(
+                "{} [ERROR] 更新域名主机记录失败: {}".format(
+                    get_readable_time(), UpdateError
+                )
+            )
+            self._send_mail(
+                self.send_list,
+                "[{}][FAIL]UpdateDomainRecord".format(self.domain_name),
+                "域名 {} 主机记录 {} 的值于 {} 变更失败, 原因:\n\n{}".format(
+                    self.domain_name, self.rr_key_word, get_readable_time(), UpdateError
+                ),
+            )
             return False
 
     def _send_mail(self, to_addrs: list, header: str, msg: str):
@@ -256,13 +312,17 @@ class AliDDNS:
         try:
             smtp.login(self.mail_user, self.mail_passwd)
         except Exception as SmtpLoginError:
-            print('{} [ERROR] SMTP登陆失败: {}'.format(get_readable_time(), SmtpLoginError))
+            print(
+                "{} [ERROR] SMTP登陆失败: {}".format(
+                    get_readable_time(), SmtpLoginError
+                )
+            )
             return
-        message = MIMEText(msg, 'plain', 'utf-8')
-        message['From'] = Header(self.mail_sender, 'utf-8')
-        message['Subject'] = Header(header, 'utf-8')
+        message = MIMEText(msg, "plain", "utf-8")
+        message["From"] = Header(self.mail_sender, "utf-8")
+        message["Subject"] = Header(header, "utf-8")
         for addr in to_addrs:
-            message['To'] = Header(addr, 'utf-8')
+            message["To"] = Header(addr, "utf-8")
             smtp.sendmail(self.mail_user, addr, message.as_string())
         smtp.quit()
         return
@@ -274,15 +334,19 @@ class AliDDNS:
         """
         current_config = self._read_record_config()
         current_ip = self._get_pubic_ipaddr()
-        if current_ip != current_config['record_value']:
-            update_result = self._update_record(current_config['record_id'], current_ip)
-            self._update_record_config(current_config['record_id'], current_ip)
+        if current_ip != current_config["record_value"]:
+            update_result = self._update_record(current_config["record_id"], current_ip)
+            self._update_record_config(current_config["record_id"], current_ip)
             if update_result:
                 current_config = self._read_record_config()
-                print('{} [SUCCESS] 更新域名主机记录成功: {}'.format(get_readable_time(), current_config))
+                print(
+                    "{} [SUCCESS] 更新域名主机记录成功: {}".format(
+                        get_readable_time(), current_config
+                    )
+                )
         sys.exit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     service = AliDDNS()
     service.main()
