@@ -60,7 +60,10 @@ class Utils:
     def get_timestamp(self, utc=False) -> str:
         """获取可读时间"""
         if utc:  # UTC时间为阿里验签用
-            return datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+            try:
+                return datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+            except:
+                return datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
         else:  # 日志用
             return time.strftime(
                 "%Y-%m-%d %H:%M:%S", time.localtime(self.get_unix_time())
