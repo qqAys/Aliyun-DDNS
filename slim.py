@@ -26,7 +26,7 @@ import urllib.request
 import uuid
 from email.header import Header
 from email.mime.text import MIMEText
-from typing import Any, LiteralString
+from typing import Any
 from urllib.parse import quote
 
 # dns action
@@ -130,7 +130,7 @@ class Utils:
 
     def handle_headers(
         self, _headers, canonicalized=True
-    ) -> dict[Any, str] | tuple[str, LiteralString]:
+    ) -> Any:
         """处理请求头"""
         canon_keys = []
         tmp_headers = {}
