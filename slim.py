@@ -154,7 +154,7 @@ class Utils:
             return canonical_headers, ";".join(canon_keys)
 
     @staticmethod
-    def to_str(val) -> str | None:
+    def to_str(val) -> Any:
         """转换字符串"""
         if val is None:
             return val
@@ -389,7 +389,7 @@ class AliDDNS:
         if action == DESCRIBE:
             return response["DomainRecords"]
 
-    def _describe_record(self) -> bool | dict[str, Any]:
+    def _describe_record(self) -> Any:
         """
         查询解析记录
         :return: dict & bool(false)
