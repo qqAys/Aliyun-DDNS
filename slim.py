@@ -24,13 +24,18 @@ import sys
 import time
 import urllib.request
 import uuid
-from typing import Any
 from email.header import Header
 from email.mime.text import MIMEText
+from typing import Any, LiteralString
 from urllib.parse import quote
 
+# dns action
 UPDATE = "update"
 DESCRIBE = "describe"
+
+# msg level
+INFO = "INFO"
+ERROR = "ERROR"
 
 
 class Request:
@@ -52,6 +57,11 @@ class Utils:
     tea_version = "0.3.0"
     signature_algorithm = "ACS3-HMAC-SHA256"
 
+    def printer(self, level, *msg):
+        print(
+            f"{self.get_timestamp()} [{level}] {' '.join(self.to_str(m) for m in msg)}"
+        )
+
     @staticmethod
     def get_unix_time() -> int:
         """获取 unix time"""
@@ -62,8 +72,11 @@ class Utils:
         if utc:  # UTC时间为阿里验签用
             try:
                 return datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-            except:
-                return datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+            except Exception as GetUtcTimeError:
+                self.printer(INFO, "获取UTC方法错误, 尝试其他方法", GetUtcTimeError)
+                return datetime.datetime.now(datetime.UTC).strftime(
+                    "%Y-%m-%dT%H:%M:%SZ"
+                )
         else:  # 日志用
             return time.strftime(
                 "%Y-%m-%d %H:%M:%S", time.localtime(self.get_unix_time())
@@ -84,17 +97,17 @@ class Utils:
         return str(uuid.uuid5(namespace, name))
 
     @staticmethod
-    def hex_encode(raw) -> bytes:
+    def hex_encode(raw) -> str:
         """十六进制编码"""
         return binascii.b2a_hex(raw).decode("utf-8")
 
-    @staticmethod
-    def hash_bytes(raw, sign_type) -> bytes:
+    def hash_bytes(self, raw, sign_type) -> bytes:
         """哈希运算, 默认使用 ACS3-HMAC-SHA256"""
         if sign_type == "ACS3-HMAC-SHA256":
             return hashlib.sha256(raw).digest()
         else:
-            raise ValueError(f"Unsupported or unknown signature type: {sign_type}")
+            self.printer(ERROR, "不支持的签名类型:", sign_type)
+            sys.exit()
 
     @staticmethod
     def get_canonical_query_string(query) -> str:
@@ -115,7 +128,9 @@ class Utils:
             query_string += s
         return query_string[:-1]
 
-    def handle_headers(self, _headers, canonicalized=True) -> Any:
+    def handle_headers(
+        self, _headers, canonicalized=True
+    ) -> dict[Any, str] | tuple[str, LiteralString]:
         """处理请求头"""
         canon_keys = []
         tmp_headers = {}
@@ -139,7 +154,7 @@ class Utils:
             return canonical_headers, ";".join(canon_keys)
 
     @staticmethod
-    def to_str(val) -> str:
+    def to_str(val) -> str | None:
         """转换字符串"""
         if val is None:
             return val
@@ -149,13 +164,15 @@ class Utils:
         else:
             return str(val)
 
-    @staticmethod
-    def signature_method(secret, source, sign_type) -> bytes:
+    def signature_method(self, secret, source, sign_type) -> bytes:
         """加签, 默认使用 ACS3-HMAC-SHA256"""
         source = source.encode("utf-8")
         secret = secret.encode("utf-8")
         if sign_type == "ACS3-HMAC-SHA256":
             return hmac.new(secret, source, hashlib.sha256).digest()
+        else:
+            self.printer(ERROR, "不支持的签名类型:", sign_type)
+            sys.exit()
 
     def get_authorization(self, _request, sign_type, payload, ak, secret) -> str:
         """构建授权"""
@@ -199,11 +216,7 @@ class AliDDNS:
         else:
             self.config_file = self.args[1]
         if not os.path.exists(self.config_file):
-            print(
-                "{} [ERROR] 获取不到配置文件: {}".format(
-                    self.utils.get_timestamp(), self.config_file
-                )
-            )
+            self.utils.printer(ERROR, f"获取不到配置文件:", self.config_file)
             sys.exit()
 
         self.ini_config.read(self.config_file, encoding="utf-8")
@@ -224,41 +237,21 @@ class AliDDNS:
             self.mail_passwd = self.ini_config.get("mail", "passwd")
             self._pre_match_mail = self.ini_config.get("mail", "send_to").split(",")
         except configparser.NoOptionError as NoOptionError:
-            print(
-                "{} [ERROR] 获取不到配置项: {}".format(
-                    self.utils.get_timestamp(), NoOptionError
-                )
-            )
+            self.utils.printer(ERROR, "获取不到配置项:", NoOptionError)
             sys.exit()
         except configparser.NoSectionError as NoSectionError:
-            print(
-                "{} [ERROR] 获取不到配置节: {}".format(
-                    self.utils.get_timestamp(), NoSectionError
-                )
-            )
+            self.utils.printer(ERROR, "获取不到配置节:", NoSectionError)
             sys.exit()
         except Exception as GetConfigError:
-            print(
-                "{} [ERROR] 错误的配置项: {}".format(
-                    self.utils.get_timestamp(), GetConfigError
-                )
-            )
+            self.utils.printer(ERROR, "错误的配置项:", GetConfigError)
             sys.exit()
         self.send_list = []
         if not re.match(self.pattern, self.mail_user):
-            print(
-                "{} [ERROR] 错误的邮箱地址: {}".format(
-                    self.utils.get_timestamp(), self.mail_user
-                )
-            )
+            self.utils.printer(ERROR, "错误的邮箱地址:", self.mail_user)
             sys.exit()
         for mail in self._pre_match_mail:
             if not re.match(self.pattern, mail):
-                print(
-                    "{} [WARNING] 错误的邮箱地址: {}".format(
-                        self.utils.get_timestamp(), mail
-                    )
-                )
+                self.utils.printer(ERROR, "错误的邮箱地址:", mail)
             else:
                 self.send_list.append(mail)
 
@@ -268,11 +261,7 @@ class AliDDNS:
         :return: dict
         """
         if not os.path.exists(self.record_file):
-            print(
-                "{} [INFO] 获取不到配置文件: {}".format(
-                    self.utils.get_timestamp(), self.record_file
-                )
-            )
+            self.utils.printer(INFO, "获取不到配置文件:", self.record_file)
             current_record = self._describe_record()
             with open(self.record_file, "w") as record_file:
                 record_file.write(
@@ -293,11 +282,7 @@ class AliDDNS:
                 "write_time": write_time,
             }
         except configparser.NoSectionError as NoSectionError:
-            print(
-                "{} [INFO] 获取不到配置节: {}".format(
-                    self.utils.get_timestamp(), NoSectionError
-                )
-            )
+            self.utils.printer(INFO, "获取不到配置节:", NoSectionError)
             current_record = self._describe_record()
             with open(self.record_file, "w") as record_file:
                 record_file.write(
@@ -340,11 +325,7 @@ class AliDDNS:
             with urllib.request.urlopen(self.pub_ip_url) as response:
                 ip = response.read().decode("utf-8").strip()
         except Exception as GetPubicIpERROR:
-            print(
-                "{} [ERROR] 获取公网IP失败: {}".format(
-                    self.utils.get_timestamp(), GetPubicIpERROR
-                )
-            )
+            self.utils.printer(ERROR, "获取公网IP失败:", GetPubicIpERROR)
             sys.exit()
         return ip
 
@@ -384,7 +365,8 @@ class AliDDNS:
                 "RRKeyWord": self.rr_key_word,
             }
         else:
-            raise ValueError("未知的action: ", action)
+            self.utils.printer(ERROR, "未知的action:", action)
+            sys.exit()
 
         authorization = utils.get_authorization(
             request,
@@ -395,7 +377,6 @@ class AliDDNS:
         )
         request.headers["Authorization"] = authorization
 
-        # response = requests.post(url=url, headers=request.headers)
         req = urllib.request.Request(
             url, data=None, headers=request.headers, method="POST"
         )
@@ -408,7 +389,7 @@ class AliDDNS:
         if action == DESCRIBE:
             return response["DomainRecords"]
 
-    def _describe_record(self) -> Any:
+    def _describe_record(self) -> bool | dict[str, Any]:
         """
         查询解析记录
         :return: dict & bool(false)
@@ -416,11 +397,7 @@ class AliDDNS:
         try:
             response = self._handle_request(DESCRIBE)
         except Exception as DescribeError:
-            print(
-                "{} [ERROR] 查询域名主机记录失败: {}".format(
-                    self.utils.get_timestamp(), DescribeError
-                )
-            )
+            self.utils.printer(ERROR, "查询域名主机记录失败:", DescribeError)
             self._send_mail(
                 self.send_list,
                 "[{}][FAIL]DescribeDomainRecord".format(self.domain_name),
@@ -458,11 +435,7 @@ class AliDDNS:
             )
             return True
         except Exception as UpdateError:
-            print(
-                "{} [ERROR] 更新域名主机记录失败: {}".format(
-                    self.utils.get_timestamp(), UpdateError
-                )
-            )
+            self.utils.printer(ERROR, "更新域名主机记录失败:", UpdateError)
             self._send_mail(
                 self.send_list,
                 "[{}][FAIL]UpdateDomainRecord".format(self.domain_name),
@@ -475,10 +448,10 @@ class AliDDNS:
             )
             return False
 
-    def _send_mail(self, to_addrs: list, header: str, msg: str) -> None:
+    def _send_mail(self, to_address: list, header: str, msg: str) -> None:
         """
         发送邮件
-        :param to_addrs: list(mail_list)
+        :param to_address: list(mail_list)
         :param header: str
         :param msg: str
         :return: none
@@ -487,16 +460,12 @@ class AliDDNS:
         try:
             smtp.login(self.mail_user, self.mail_passwd)
         except Exception as SmtpLoginError:
-            print(
-                "{} [ERROR] SMTP登陆失败: {}".format(
-                    self.utils.get_timestamp(), SmtpLoginError
-                )
-            )
+            self.utils.printer(ERROR, "SMTP登陆失败:", SmtpLoginError)
             return
         message = MIMEText(msg, "plain", "utf-8")
         message["From"] = Header(self.mail_sender, "utf-8")
         message["Subject"] = Header(header, "utf-8")
-        for addr in to_addrs:
+        for addr in to_address:
             message["To"] = Header(addr, "utf-8")
             smtp.sendmail(self.mail_user, addr, message.as_string())
         smtp.quit()
@@ -514,11 +483,7 @@ class AliDDNS:
             self._update_record_config(current_config["record_id"], current_ip)
             if update_result:
                 current_config = self._read_record_config()
-                print(
-                    "{} [SUCCESS] 更新域名主机记录成功: {}".format(
-                        self.utils.get_timestamp(), current_config
-                    )
-                )
+                self.utils.printer(INFO, "更新域名主机记录成功:", current_config)
         sys.exit()
 
 
