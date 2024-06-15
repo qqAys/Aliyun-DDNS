@@ -53,7 +53,7 @@ mv config.ini.example config.ini
 
 ## 效果
 
-![DDNS.log](https://cdn.qqays.xyz/uploads/2023/12/06/Snipaste_2023-12-06_09-49-35.png)
+![DDNS.log](https://qqays-mkdocs-blog.oss-cn-shenzhen.aliyuncs.com/uploads/2023/12/06/Snipaste_2023-12-06_09-49-35.png)
 
 ## 相关链接
 
