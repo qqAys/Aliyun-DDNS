@@ -1,7 +1,7 @@
 [service]
 # 检测公网IP地址的链接, 以下只能唯一值, 亚马逊速度稍慢
 # pub_ip_url=http://checkip.amazonaws.com
-pub_ip_url=http://service.qqays.xyz/my-ip
+pub_ip_url=https://service.qqays.xyz/my-ip
 
 [account]
 # 阿里云云解析服务区域列表, 参考 https://api.aliyun.com/product/Alidns
