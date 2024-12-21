@@ -6,12 +6,11 @@ import smtplib
 from email.header import Header
 from email.mime.text import MIMEText
 from pathlib import Path
-from typing import Any
 
 import requests
 import yaml
 from alibabacloud_alidns20150109 import models as alidns_20150109_models
-from alibabacloud_alidns20150109.client import Client as Alidns20150109Client, Client
+from alibabacloud_alidns20150109.client import Client as Alidns20150109Client
 from alibabacloud_tea_openapi import models as open_api_models
 from alibabacloud_tea_util import models as util_models
 from alibabacloud_tea_util.client import Client as UtilClient
@@ -67,7 +66,7 @@ class AliyunDDNS:
 
         self.smtp_config: dict = config.get("smtp")
 
-    def parse_args(self, args) -> None:
+    def parse_args(self, args):
         self.config_file = Path("./config.yml")
         if args.config_file is not None:
             custom_config_file = Path(args.config_file)
@@ -76,20 +75,20 @@ class AliyunDDNS:
             else:
                 logger.error(f"{custom_config_file} 配置文件不存在")
 
-    def parse_config(self) -> Any:
+    def parse_config(self):
         with open(self.config_file, "r", encoding="utf-8") as config_file:
             return yaml.safe_load(config_file)
 
-    def parse_temp_data(self) -> Any:
+    def parse_temp_data(self):
         with open(self.temp_data_file, "r", encoding="utf-8") as temp_data_file:
             return yaml.safe_load(temp_data_file)
 
-    def save_temp_data(self, current_ip) -> int:
+    def save_temp_data(self, current_ip):
         data = {"current_ip": current_ip, "remote_record_id": self.remote_record_id}
         with open(self.temp_data_file, "w", encoding="utf-8") as temp_data_file:
             return temp_data_file.write(yaml.dump(data))
 
-    def fetch_current_ip(self) -> str | None:
+    def fetch_current_ip(self):
         logger.info("获取当前公网IP地址...")
 
         urls = self.public_ip_config.get("urls", ["https://checkip.amazonaws.com/"])
@@ -128,7 +127,7 @@ class AliyunDDNS:
             logger.error(f"公网IP存在异常，[{urls[0]}]{ip_a} != [{urls[1]}]{ip_b}")
             return None
 
-    def create_client(self) -> Client:
+    def create_client(self):
         config = open_api_models.Config(
             access_key_id=self.access_key_id,
             access_key_secret=self.access_key_secret,
@@ -136,7 +135,7 @@ class AliyunDDNS:
         )
         return Alidns20150109Client(config)
 
-    def describe_record(self) -> str | None:
+    def describe_record(self):
         client = self.create_client()
         describe_domain_records_request = (
             alidns_20150109_models.DescribeDomainRecordsRequest(
@@ -156,7 +155,7 @@ class AliyunDDNS:
             logger.error(DescribeError)
             return None
 
-    def update_record(self, record_value: str) -> bool:
+    def update_record(self, record_value: str):
         client = self.create_client()
         update_domain_record_request = alidns_20150109_models.UpdateDomainRecordRequest(
             record_id=self.remote_record_id,
@@ -174,7 +173,7 @@ class AliyunDDNS:
             logger.error(UpdateError)
             return False
 
-    def send_mail(self, header: str, msg: str) -> None:
+    def send_mail(self, header: str, msg: str):
         if self.smtp_config.get("ssl") is True:
             smtp = smtplib.SMTP_SSL(
                 self.smtp_config.get("host"), self.smtp_config.get("port")
@@ -201,7 +200,7 @@ class AliyunDDNS:
         smtp.quit()
         return
 
-    def run(self) -> None:
+    def run(self):
         logger.debug(f"正在读取 {self.temp_data_file}")
         temp_data = self.parse_temp_data()
 
