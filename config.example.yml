@@ -1,0 +1,36 @@
+public_ip:
+    # 检测公网IP地址的链接, 亚马逊速度稍慢
+    urls:
+        - "https://service.qqays.xyz/my-ip"
+        - "https://checkip.amazonaws.com/"
+        - "https://ipv4.icanhazip.com/"
+    # 超时时间
+    timeout: 5
+
+account:
+    # 阿里云申请的AccessKey信息
+    access_key_id: "*******************"
+    access_key_secret: "********************"
+
+domain:
+    # 阿里云云解析服务区域列表, 参考 https://api.aliyun.com/product/Alidns
+    dns_end_point: "alidns.cn-shenzhen.aliyuncs.com"
+    # 域名
+    name: "example.com"
+    # 主机记录, 例如: not.example.com
+    rr: "not"
+    # 记录类型
+    type: "A"
+
+smtp:
+    # SMTP配置
+    host: "smtp.example.com"
+    port: 465
+    ssl: true
+    username: "ddns@example.com"
+    password: "************"
+    from_address: "ddns@example.com"
+    # 接收邮箱
+    to_addresses:
+        - "admin@example.com"
+        - "me@example.com"
