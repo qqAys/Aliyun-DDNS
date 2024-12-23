@@ -43,9 +43,9 @@ mv config.example.yml config.yml
    - 使用 `main.py`, 可指定参数`-c`或`--config_file`, 其他参数参见`-h`
    
        ```shell
-       */5 * * * * python ~/Aliyun-DDNS/main.py >> ~/.ddns.log
+       */5 * * * * python ~/Aliyun-DDNS/main.py &>> ~/.ddns.log
        # 或者指定配置文件路径参数
-       */5 * * * * python ~/Aliyun-DDNS/main.py -c /path/config.yml >> ~/.ddns.log
+       */5 * * * * python ~/Aliyun-DDNS/main.py -c /path/config.yml &>> ~/.ddns.log
        ```
 
    - ~~使用 `slim.py`~~(`main.py`使用yaml后, `slim.py`将不支持)
