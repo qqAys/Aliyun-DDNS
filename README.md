@@ -26,7 +26,7 @@ git clone https://github.com/qqAys/Aliyun-DDNS.git
 cd Aliyun-DDNS
 ```
 
-2. 安装Python要求。(slim无需执行该步骤)
+2. 安装Python要求。~~(slim无需执行该步骤)~~
 
 ```shell
 pip install -r requirements.txt
