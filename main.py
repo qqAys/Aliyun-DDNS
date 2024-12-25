@@ -204,9 +204,14 @@ class AliyunDDNS:
         logger.debug(f"正在读取 {self.temp_data_file}")
         temp_data = self.parse_temp_data()
 
+        current_ip = self.fetch_current_ip()
+
+        if current_ip is None:
+            logger.error("当前IP获取失败，跳过此次运行")
+            return
+
         if temp_data is None:
             logger.debug("内容为空")
-            current_ip = self.fetch_current_ip()
             remote_ip = self.describe_record()
 
             if remote_ip != current_ip:
@@ -229,7 +234,6 @@ class AliyunDDNS:
             self.save_temp_data(current_ip)
         else:
             logger.debug(f"读取完成 {temp_data}")
-            current_ip = self.fetch_current_ip()
             temp_data_record_ip = temp_data["current_ip"]
             self.remote_record_id = temp_data["remote_record_id"]
 
