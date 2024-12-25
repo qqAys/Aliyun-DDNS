@@ -215,13 +215,13 @@ class AliyunDDNS:
                 if update_result is False:
                     self.send_mail(
                         "[FAIL]UpdateDomainRecord",
-                        f"{self.rr_key_word}{self.domain_name} {remote_ip} --X {current_ip}",
+                        f"{self.rr_key_word}.{self.domain_name} {remote_ip} --X {current_ip}",
                     )
                     logger.error("更改失败")
                 else:
                     self.send_mail(
                         "[PASS]UpdateDomainRecord",
-                        f"{self.rr_key_word}{self.domain_name} {remote_ip} --> {current_ip}",
+                        f"{self.rr_key_word}.{self.domain_name} {remote_ip} --> {current_ip}",
                     )
                     logger.info("更改成功")
             else:
@@ -239,13 +239,13 @@ class AliyunDDNS:
                 if update_result is False:
                     self.send_mail(
                         "[FAIL]UpdateDomainRecord",
-                        f"{self.rr_key_word}{self.domain_name} {temp_data_record_ip} --X {current_ip}",
+                        f"{self.rr_key_word}.{self.domain_name} {temp_data_record_ip} --X {current_ip}",
                     )
                     logger.error("更改失败")
                 else:
                     self.send_mail(
                         "[PASS]UpdateDomainRecord",
-                        f"{self.rr_key_word}{self.domain_name} {temp_data_record_ip} --> {current_ip}",
+                        f"{self.rr_key_word}.{self.domain_name} {temp_data_record_ip} --> {current_ip}",
                     )
                     self.save_temp_data(current_ip)
                     logger.info("更改成功")
